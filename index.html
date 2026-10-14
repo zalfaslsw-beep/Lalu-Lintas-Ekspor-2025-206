@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analisis Ekspor Perikanan (2025 - 2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-slate-900 via-sky-950 to-blue-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-500/20 p-2.5 rounded-2xl border border-sky-400/30 backdrop-blur-md">
+                    <i class="fa-solid fa-ship text-2xl text-sky-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Dashboard Analisis Ekspor Perikanan</h1>
+                    <p class="text-xs text-sky-200">Laporan Komoditi, Volume & Negara Tujuan (2025 - 2026)</p>
+                </div>
+            </div>
+            
+            <!-- Quick Filters Header -->
+            <div class="flex flex-wrap items-center gap-2 bg-white/10 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+                <select id="filterTahun" onchange="applyFilters()" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <option value="ALL">Semua Tahun (2025 & 2026)</option>
+                    <option value="2025">Tahun 2025</option>
+                    <option value="2026">Tahun 2026</option>
+                </select>
+
+                <select id="filterBulan" onchange="applyFilters()" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <option value="ALL">Semua Bulan</option>
+                    <option value="Januari">Januari</option>
+                    <option value="Februari">Februari</option>
+                    <option value="Maret">Maret</option>
+                    <option value="April">April</option>
+                    <option value="Mei">Mei</option>
+                    <option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option>
+                    <option value="Agustus">Agustus</option>
+                    <option value="September">September</option>
+                    <option value="Oktober">Oktober</option>
+                    <option value="November">November</option>
+                    <option value="Desember">Desember</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1 w-full">
+
+        <!-- KPI Cards Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Frekuensi</p>
+                    <h3 id="stat-total-freq" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Kali pengiriman</p>
+                </div>
+                <div class="bg-blue-50 text-blue-600 p-3 rounded-xl text-xl">
+                    <i class="fa-solid fa-plane-departure"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Volume (Kg)</p>
+                    <h3 id="stat-total-kg" class="text-xl font-bold text-emerald-600 mt-1">0 Kg</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Komoditi Timbangan</p>
+                </div>
+                <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-xl">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Volume (Ekor)</p>
+                    <h3 id="stat-total-ekor" class="text-xl font-bold text-amber-600 mt-1">0 Ekor</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Kepiting/Udang/Ikan</p>
+                </div>
+                <div class="bg-amber-50 text-amber-600 p-3 rounded-xl text-xl">
+                    <i class="fa-solid fa-fish text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jenis Komoditi</p>
+                    <h3 id="stat-total-komoditi" class="text-2xl font-bold text-indigo-600 mt-1">0</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Komoditi aktif</p>
+                </div>
+                <div class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-xl">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Negara Tujuan</p>
+                    <h3 id="stat-total-negara" class="text-2xl font-bold text-teal-600 mt-1">0</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Destinasi Ekspor</p>
+                </div>
+                <div class="bg-teal-50 text-teal-600 p-3 rounded-xl text-xl">
+                    <i class="fa-solid fa-earth-asia"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Top Komoditi (Kg) Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Top Komoditi Berdasarkan Volume (Kg)</h3>
+                        <p class="text-xs text-slate-400">Total berat kiriman per jenis komoditi</p>
+                    </div>
+                    <span class="text-xs bg-emerald-50 text-emerald-600 font-semibold px-2.5 py-1 rounded-full">Kg</span>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="chartKomoditiKg"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Komoditi (Ekor) Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Top Komoditi Berdasarkan Jumlah (Ekor)</h3>
+                        <p class="text-xs text-slate-400">Total ekor kiriman per jenis komoditi</p>
+                    </div>
+                    <span class="text-xs bg-amber-50 text-amber-600 font-semibold px-2.5 py-1 rounded-full">Ekor</span>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="chartKomoditiEkor"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Negara Tujuan Pie Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-between">
+                <div class="w-full text-left mb-4">
+                    <h3 class="text-base font-bold text-slate-800">Pangsa Negara Tujuan</h3>
+                    <p class="text-xs text-slate-400">Proporsi frekuensi pengiriman berdasarkan negara</p>
+                </div>
+                <div class="relative h-64 w-full flex justify-center items-center">
+                    <canvas id="chartNegara"></canvas>
+                </div>
+                <div id="negaraLegend" class="mt-4 text-xs space-y-1.5 text-slate-600 w-full"></div>
+            </div>
+
+            <!-- Frekuensi Komoditi Bar Chart -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Frekuensi Pengiriman Per Komoditi</h3>
+                        <p class="text-xs text-slate-400">Intensitas transaksi pengiriman ekspor</p>
+                    </div>
+                    <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-2.5 py-1 rounded-full">Frekuensi</span>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartFrekuensi"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Rincian Data Transaksi Ekspor</h3>
+                    <p class="text-xs text-slate-500">Daftar lengkap transaksi ekspor perikanan berdasarkan filter yang dipilih.</p>
+                </div>
+                <div class="w-full sm:w-80 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterTable()" placeholder="Cari komoditi atau negara..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-100">
+                            <th class="py-4 px-6">Periode</th>
+                            <th class="py-4 px-6">Komoditi</th>
+                            <th class="py-4 px-6 text-center">Frekuensi</th>
+                            <th class="py-4 px-6 text-right">Jumlah / Volume</th>
+                            <th class="py-4 px-6 text-center">Satuan</th>
+                            <th class="py-4 px-6">Negara Tujuan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Full Dataset extracted from ekspor all.docx
+        const rawDataset = [
+            // 2025 DATA
+            { bulan: "Januari", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 4, jumlah: 53383, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Januari", tahun: "2025", komoditi: "Kepiting", frekuensi: 19, jumlah: 2273, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Januari", tahun: "2025", komoditi: "Ikan Kerapu", frekuensi: 2, jumlah: 13, satuan: "kg", negara: "Korea Selatan" },
+            { bulan: "Januari", tahun: "2025", komoditi: "Ikan Kakap", frekuensi: 1, jumlah: 13, satuan: "kg", negara: "Korea Selatan" },
+            { bulan: "Januari", tahun: "2025", komoditi: "Udang Vaname", frekuensi: 1, jumlah: 1, satuan: "kg", negara: "Korea Selatan" },
+            
+            { bulan: "Februari", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 3, jumlah: 40059, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Februari", tahun: "2025", komoditi: "Kepiting", frekuensi: 17, jumlah: 2274, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Februari", tahun: "2025", komoditi: "Kerang Dara", frekuensi: 1, jumlah: 300, satuan: "kg", negara: "Thailand" },
+            { bulan: "Februari", tahun: "2025", komoditi: "Udang Ronggeng", frekuensi: 1, jumlah: 40, satuan: "ekor", negara: "Singapura" },
+            
+            { bulan: "Maret", tahun: "2025", komoditi: "Kepiting Bakau", frekuensi: 13, jumlah: 1664, satuan: "kg", negara: "Singapura" },
+            { bulan: "Maret", tahun: "2025", komoditi: "Cakalang Asap", frekuensi: 1, jumlah: 3, satuan: "kg", negara: "Malaysia" },
+            
+            { bulan: "April", tahun: "2025", komoditi: "Kepiting Bakau", frekuensi: 17, jumlah: 1984, satuan: "kg", negara: "Singapura" },
+            { bulan: "April", tahun: "2025", komoditi: "Kerang Darah", frekuensi: 3, jumlah: 2350, satuan: "kg", negara: "Thailand" },
+            
+            { bulan: "Juni", tahun: "2025", komoditi: "Kepiting Bakau", frekuensi: 20, jumlah: 2384, satuan: "kg", negara: "Singapura" },
+            { bulan: "Juni", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 1, jumlah: 15, satuan: "kg", negara: "Korea Selatan" },
+            
+            { bulan: "Juli", tahun: "2025", komoditi: "Kepiting", frekuensi: 16, jumlah: 2069, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Juli", tahun: "2025", komoditi: "Tuna", frekuensi: 4, jumlah: 66357, satuan: "kg", negara: "Singapura" },
+            { bulan: "Juli", tahun: "2025", komoditi: "Ikan Kerapu", frekuensi: 2, jumlah: 20, satuan: "ekor", negara: "Vietnam" },
+            { bulan: "Juli", tahun: "2025", komoditi: "Udang Mantis", frekuensi: 1, jumlah: 34, satuan: "ekor", negara: "Korea Selatan" },
+            { bulan: "Juli", tahun: "2025", komoditi: "Frozen Squid", frekuensi: 1, jumlah: 3.5, satuan: "kg", negara: "Singapura" },
+            
+            { bulan: "Agustus", tahun: "2025", komoditi: "Kepiting", frekuensi: 14, jumlah: 2160, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Agustus", tahun: "2025", komoditi: "Tuna", frekuensi: 6, jumlah: 100006, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Agustus", tahun: "2025", komoditi: "Kepiting Bakau", frekuensi: 22, jumlah: 2198, satuan: "ekor", negara: "Singapura" },
+
+            { bulan: "September", tahun: "2025", komoditi: "Kepiting", frekuensi: 14, jumlah: 2160, satuan: "ekor", negara: "Singapura" },
+            { bulan: "September", tahun: "2025", komoditi: "Tuna", frekuensi: 6, jumlah: 100006, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "Oktober", tahun: "2025", komoditi: "Kepiting", frekuensi: 20, jumlah: 2850, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Oktober", tahun: "2025", komoditi: "Udang Vaname", frekuensi: 2, jumlah: 14, satuan: "kg", negara: "Korea Selatan" },
+            { bulan: "Oktober", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 1, jumlah: 13352, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "November", tahun: "2025", komoditi: "Kepiting", frekuensi: 16, jumlah: 2100, satuan: "ekor", negara: "Singapura" },
+            { bulan: "November", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 3, jumlah: 40051, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "Desember", tahun: "2025", komoditi: "Kepiting", frekuensi: 20, jumlah: 2434, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Desember", tahun: "2025", komoditi: "Ikan Tuna", frekuensi: 9, jumlah: 93406, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Desember", tahun: "2025", komoditi: "Ikan Tenggiri", frekuensi: 1, jumlah: 67, satuan: "kg", negara: "Singapura" },
+            { bulan: "Desember", tahun: "2025", komoditi: "Ikan Kerapu", frekuensi: 1, jumlah: 26, satuan: "kg", negara: "Singapura" },
+
+            // 2026 DATA
+            { bulan: "Januari", tahun: "2026", komoditi: "Kepiting", frekuensi: 13, jumlah: 1900, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Tuna", frekuensi: 4, jumlah: 53385, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Udang Mantis", frekuensi: 3, jumlah: 125, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Kepiting", frekuensi: 20, jumlah: 2440, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Kepiting", frekuensi: 1, jumlah: 10, satuan: "box", negara: "Singapura" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Tuna", frekuensi: 3, jumlah: 40037, satuan: "kg", negara: "Thailand" },
+            { bulan: "Januari", tahun: "2026", komoditi: "Udang Mantis", frekuensi: 1, jumlah: 30, satuan: "ekor", negara: "Singapura" },
+
+            { bulan: "Februari", tahun: "2026", komoditi: "Kepiting", frekuensi: 18, jumlah: 2930, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Februari", tahun: "2026", komoditi: "Tuna", frekuensi: 3, jumlah: 40069, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "Maret", tahun: "2026", komoditi: "Kepiting", frekuensi: 14, jumlah: 2120, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Maret", tahun: "2026", komoditi: "Tuna", frekuensi: 4, jumlah: 66392, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "April", tahun: "2026", komoditi: "Kepiting", frekuensi: 15, jumlah: 2595, satuan: "ekor", negara: "Singapura" },
+            { bulan: "April", tahun: "2026", komoditi: "Tuna", frekuensi: 6, jumlah: 66747, satuan: "kg", negara: "Vietnam" },
+
+            { bulan: "Mei", tahun: "2026", komoditi: "Kepiting", frekuensi: 14, jumlah: 1975, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Mei", tahun: "2026", komoditi: "Tuna", frekuensi: 8, jumlah: 91940, satuan: "kg", negara: "Vietnam" },
+            { bulan: "Mei", tahun: "2026", komoditi: "Udang Vaname", frekuensi: 1, jumlah: 3, satuan: "kg", negara: "Korea Selatan" },
+            { bulan: "Mei", tahun: "2026", komoditi: "Frozen Tuna Meat", frekuensi: 1, jumlah: 14.5, satuan: "kg", negara: "Singapura" },
+            { bulan: "Mei", tahun: "2026", komoditi: "Udang Mantis", frekuensi: 1, jumlah: 50, satuan: "ekor", negara: "Korea Selatan" },
+            { bulan: "Mei", tahun: "2026", komoditi: "Frozen Squid", frekuensi: 1, jumlah: 1.5, satuan: "kg", negara: "Korea Selatan" },
+
+            { bulan: "Juni", tahun: "2026", komoditi: "Kepiting Bakau", frekuensi: 17, jumlah: 1913, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Juli", tahun: "2026", komoditi: "Kepiting Bakau", frekuensi: 24, jumlah: 2456, satuan: "ekor", negara: "Singapura" },
+            { bulan: "Agustus", tahun: "2026", komoditi: "Kepiting Bakau", frekuensi: 23, jumlah: 2455, satuan: "ekor", negara: "Singapura" }
+        ];
+
+        // Global Chart Instances
+        let chartKomoditiKgInstance = null;
+        let chartKomoditiEkorInstance = null;
+        let chartNegaraInstance = null;
+        let chartFrekuensiInstance = null;
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(num);
+        }
+
+        function getFilteredData() {
+            const selectedTahun = document.getElementById('filterTahun').value;
+            const selectedBulan = document.getElementById('filterBulan').value;
+
+            return rawDataset.filter(item => {
+                const matchTahun = selectedTahun === 'ALL' || item.tahun === selectedTahun;
+                const matchBulan = selectedBulan === 'ALL' || item.bulan === selectedBulan;
+                return matchTahun && matchBulan;
+            });
+        }
+
+        function applyFilters() {
+            const data = getFilteredData();
+            updateStats(data);
+            updateCharts(data);
+            renderTable(data);
+        }
+
+        function updateStats(data) {
+            const totalFreq = data.reduce((acc, curr) => acc + curr.frekuensi, 0);
+            
+            const totalKg = data
+                .filter(item => item.satuan.toLowerCase() === 'kg')
+                .reduce((acc, curr) => acc + curr.jumlah, 0);
+
+            const totalEkor = data
+                .filter(item => item.satuan.toLowerCase() === 'ekor')
+                .reduce((acc, curr) => acc + curr.jumlah, 0);
+
+            const uniqueKomoditi = new Set(data.map(item => item.komoditi.toLowerCase())).size;
+            const uniqueNegara = new Set(data.map(item => item.negara)).size;
+
+            document.getElementById('stat-total-freq').innerText = formatNumber(totalFreq);
+            document.getElementById('stat-total-kg').innerText = formatNumber(totalKg) + ' Kg';
+            document.getElementById('stat-total-ekor').innerText = formatNumber(totalEkor) + ' Ekor';
+            document.getElementById('stat-total-komoditi').innerText = uniqueKomoditi;
+            document.getElementById('stat-total-negara').innerText = uniqueNegara;
+        }
+
+        function updateCharts(data) {
+            // Aggregate Volume Kg per Komoditi
+            const kgMap = {};
+            data.filter(d => d.satuan.toLowerCase() === 'kg').forEach(d => {
+                const key = d.komoditi;
+                kgMap[key] = (kgMap[key] || 0) + d.jumlah;
+            });
+
+            const sortedKg = Object.entries(kgMap).sort((a, b) => b[1] - a[1]);
+            const labelsKg = sortedKg.map(item => item[0]);
+            const valuesKg = sortedKg.map(item => item[1]);
+
+            // Chart Kg
+            const ctxKg = document.getElementById('chartKomoditiKg').getContext('2d');
+            if (chartKomoditiKgInstance) chartKomoditiKgInstance.destroy();
+
+            chartKomoditiKgInstance = new Chart(ctxKg, {
+                type: 'bar',
+                data: {
+                    labels: labelsKg.length > 0 ? labelsKg : ['Tidak ada data'],
+                    datasets: [{
+                        label: 'Volume (Kg)',
+                        data: valuesKg.length > 0 ? valuesKg : [0],
+                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                        borderColor: 'rgb(5, 150, 105)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => ` Volume: ${formatNumber(c.raw)} Kg` } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => v >= 1000 ? (v / 1000) + ' Ton' : v }
+                        }
+                    }
+                }
+            });
+
+            // Aggregate Volume Ekor per Komoditi
+            const ekorMap = {};
+            data.filter(d => d.satuan.toLowerCase() === 'ekor').forEach(d => {
+                const key = d.komoditi;
+                ekorMap[key] = (ekorMap[key] || 0) + d.jumlah;
+            });
+
+            const sortedEkor = Object.entries(ekorMap).sort((a, b) => b[1] - a[1]);
+            const labelsEkor = sortedEkor.map(item => item[0]);
+            const valuesEkor = sortedEkor.map(item => item[1]);
+
+            // Chart Ekor
+            const ctxEkor = document.getElementById('chartKomoditiEkor').getContext('2d');
+            if (chartKomoditiEkorInstance) chartKomoditiEkorInstance.destroy();
+
+            chartKomoditiEkorInstance = new Chart(ctxEkor, {
+                type: 'bar',
+                data: {
+                    labels: labelsEkor.length > 0 ? labelsEkor : ['Tidak ada data'],
+                    datasets: [{
+                        label: 'Jumlah (Ekor)',
+                        data: valuesEkor.length > 0 ? valuesEkor : [0],
+                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                        borderColor: 'rgb(217, 119, 6)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => ` Jumlah: ${formatNumber(c.raw)} Ekor` } }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // Aggregate Frekuensi per Negara
+            const negaraMap = {};
+            data.forEach(d => {
+                negaraMap[d.negara] = (negaraMap[d.negara] || 0) + d.frekuensi;
+            });
+
+            const labelsNegara = Object.keys(negaraMap);
+            const valuesNegara = Object.values(negaraMap);
+            const totalFreqSum = valuesNegara.reduce((a, b) => a + b, 0);
+
+            const colors = [
+                'rgba(59, 130, 246, 0.85)',
+                'rgba(16, 185, 129, 0.85)',
+                'rgba(245, 158, 11, 0.85)',
+                'rgba(168, 85, 247, 0.85)',
+                'rgba(236, 72, 153, 0.85)'
+            ];
+
+            const ctxNegara = document.getElementById('chartNegara').getContext('2d');
+            if (chartNegaraInstance) chartNegaraInstance.destroy();
+
+            chartNegaraInstance = new Chart(ctxNegara, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsNegara,
+                    datasets: [{
+                        data: valuesNegara,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Custom Legend for Negara
+            const legendContainer = document.getElementById('negaraLegend');
+            legendContainer.innerHTML = '';
+            labelsNegara.forEach((label, idx) => {
+                const count = valuesNegara[idx];
+                const pct = totalFreqSum > 0 ? ((count / totalFreqSum) * 100).toFixed(1) : 0;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between text-xs";
+                div.innerHTML = `
+                    <span class="inline-flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color: ${colors[idx % colors.length]}"></span>
+                        <span class="font-medium text-slate-700">${label}</span>
+                    </span>
+                    <span class="font-bold text-slate-800">${count}x (${pct}%)</span>
+                `;
+                legendContainer.appendChild(div);
+            });
+
+            // Aggregate Frekuensi per Komoditi
+            const freqMap = {};
+            data.forEach(d => {
+                freqMap[d.komoditi] = (freqMap[d.komoditi] || 0) + d.frekuensi;
+            });
+
+            const sortedFreq = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
+            const labelsFreq = sortedFreq.map(item => item[0]);
+            const valuesFreq = sortedFreq.map(item => item[1]);
+
+            const ctxFreq = document.getElementById('chartFrekuensi').getContext('2d');
+            if (chartFrekuensiInstance) chartFrekuensiInstance.destroy();
+
+            chartFrekuensiInstance = new Chart(ctxFreq, {
+                type: 'bar',
+                data: {
+                    labels: labelsFreq,
+                    datasets: [{
+                        label: 'Frekuensi Pengiriman',
+                        data: valuesFreq,
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => ` Frekuensi: ${c.raw} kali pengiriman` } }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderTable(data, keyword = '') {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            const filtered = data.filter(item => 
+                item.komoditi.toLowerCase().includes(keyword.toLowerCase()) || 
+                item.negara.toLowerCase().includes(keyword.toLowerCase()) ||
+                item.bulan.toLowerCase().includes(keyword.toLowerCase()) ||
+                item.tahun.includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Data ekspor tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+
+                let badgeColor = "bg-slate-100 text-slate-700";
+                if (item.satuan.toLowerCase() === 'kg') badgeColor = "bg-emerald-50 text-emerald-700";
+                if (item.satuan.toLowerCase() === 'ekor') badgeColor = "bg-amber-50 text-amber-700";
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-6 font-medium text-slate-500">${item.bulan} ${item.tahun}</td>
+                    <td class="py-3.5 px-6 font-semibold text-slate-800">${item.komoditi}</td>
+                    <td class="py-3.5 px-6 text-center"><span class="bg-blue-50 text-blue-700 py-1 px-2.5 rounded-full text-xs font-semibold">${item.frekuensi}x</span></td>
+                    <td class="py-3.5 px-6 text-right font-bold text-slate-800">${formatNumber(item.jumlah)}</td>
+                    <td class="py-3.5 px-6 text-center"><span class="${badgeColor} px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase">${item.satuan}</span></td>
+                    <td class="py-3.5 px-6 font-medium text-slate-700"><i class="fa-solid fa-location-dot text-sky-500 mr-1.5 text-xs"></i>${item.negara}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const keyword = document.getElementById('searchInput').value;
+            const data = getFilteredData();
+            renderTable(data, keyword);
+        }
+
+        // Initial Load
+        window.onload = function() {
+            applyFilters();
+        };
+    </script>
+
+    <footer class="bg-white border-t border-slate-100 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            Sistem Informasi Analytics Ekspor Perikanan &bull; Data Rekapitulasi 2025 - 2026.
+        </div>
+    </footer>
+</body>
+</html>
